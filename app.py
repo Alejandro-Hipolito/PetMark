@@ -74,7 +74,13 @@ class Image(db.Model):
     image = db.Column(db.String(200), nullable=False)
 
 
-#Routes
+
+
+
+# HERE START THE ROUTES
+
+
+
 
 @app.route('/users', methods=['GET'])
 def get_users():
@@ -89,6 +95,26 @@ def get_users():
             'role': user.role.value
             })
     return jsonify(user_list)
+
+@app.route('/signup', methods=['POST'])
+def create_user():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+
+    already_user = User.query.filter_by(email=email).first()
+    if already_user:
+        return jsonify({"msg" : "User already exists"}), 400
+
+    signup = User(email=email, password=password)
+    db.session.add(signup)
+    db.session.commit()
+
+    print(signup)
+
+    return jsonify({"msg" : "Signed up successfully!"}), 201
+
+    
 
 
 if __name__ == '__main__':
