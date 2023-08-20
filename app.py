@@ -26,14 +26,14 @@ class User(db.Model):
     pets = db.relationship('Pet', backref='user')
 
 
-class Animal_Type:
+class Animal_Type(Enum):
     DOG = 'perro'
     CAT = 'gato'
     TURTLE = 'tortuga'
     BIRD = 'ave'
     OTHER = 'otro'
 
-class Sex:
+class Sex(Enum):
    MALE = 'macho'
    FEMALE = 'hembra' 
 
@@ -44,6 +44,7 @@ class Pet(db.Model):
     sex = db.Column(db.Enum(Sex), nullable=True, default=Sex.MALE)
     age = db.Column(db.Integer, nullable=True)
     observations = db.Column(db.String(500), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
 
