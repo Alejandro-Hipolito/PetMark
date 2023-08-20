@@ -1,11 +1,21 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from enum import Enum
+import os
+
+
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
-app.config['SQLALCHEMY_TRACK_NOTIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'instance', 'db.sqlite3')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+
+
+# app = Flask(__name__)
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
+# app.config['SQLALCHEMY_TRACK_NOTIFICATIONS'] = False
+# db = SQLAlchemy(app)
 # db.init_app(app) IN BIGGER PROJECTS
 
 
@@ -62,3 +72,24 @@ class Image(db.Model):
     user_id = db.Column(db.String(200), db.ForeignKey('user.id'))
     product_id = db.Column(db.String(200), db.ForeignKey('product.id'))
     image = db.Column(db.String(200), nullable=False)
+
+
+#Routes
+
+@app.route('/users', methods=['GET'])
+def get_users():
+    users = User.query.all()
+    user_list = []
+    for user in users:
+        user_list.append({
+            'id': user.id,
+            'full_name': user.full_name,
+            'email': user.email,
+            'avatar': user.avatar,
+            'role': user.role.value
+            })
+    return jsonify(user_list)
+
+
+if __name__ == '__main__':
+    app.run()
