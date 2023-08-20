@@ -18,23 +18,46 @@ class User_role(Enum):
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(40), nullable=True)
-    email = db.Column(db.String(40), nullable=False)
+    email = db.Column(db.String(40), nullable=False, unique=True)
     password = db.Column(db.String(100), nullable=False)
     avatar = db.Column(db.String(200), nullable=True)
     role = db.Column(db.Enum(User_role), nullable = False, default=User_role.COMMON_USER)
 
+    pets = db.relationship('Pet', backref='user')
 
+
+class Animal_Type:
+    DOG = 'perro'
+    CAT = 'gato'
+    TURTLE = 'tortuga'
+    BIRD = 'ave'
+    OTHER = 'otro'
+
+class Sex:
+   MALE = 'macho'
+   FEMALE = 'hembra' 
 
 class Pet(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(40), nullable=True) 
+    type = db.Column(db.Enum(Animal_Type), nullable=False, default=Animal_Type.DOG)
+    sex = db.Column(db.Enum(Sex), nullable=True, default=Sex.MALE)
+    age = db.Column(db.Integer, nullable=True)
+    observations = db.Column(db.String(500), nullable=True)
 
 
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = 
+    name = db.Column(db.String(40), nullable=False) 
+    description = db.Column(db.String(500), nullable=True)
+    images = db.relationship('Image', backref='product')
+
 
 
 
 class Image(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(200), db.ForeignKey('user.id'))
+    product_id = db.Column(db.String(200), db.ForeignKey('product.id'))
+    image = db.Column(db.String(200), nullable=False)
