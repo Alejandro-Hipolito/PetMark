@@ -1,7 +1,22 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+import secrets
 from enum import Enum
 import os
+
+
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+
+from flask_jwt_extended import JWTManager
+
+
+secret_key = secrets.token_hex(32)
+
+
 
 
 
@@ -10,7 +25,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_pat
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
+app.config['JWT_SECRET_KEY'] = secret_key
 
+
+jwt = JWTManager(app)
 
 # app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
@@ -95,6 +113,38 @@ def get_users():
             'role': user.role.value
             })
     return jsonify(user_list)
+
+# @app.route('/login', methods=['POST'])
+# def login():
+#     data = request.get_json()
+#     email = data.get('email')
+#     password = data.get('password')
+
+#     existing_user = User.query.filter_by(email = email).first()
+#     if not existing_user or existing_user.password != password:
+#         return jsonify({'msg' : 'Invalid credentials'})
+    
+#     return jsonify({'msg' : 'Login successful'}), 200
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    email = data.get("email")
+    password = data.get("password")
+    if not email or not password:
+        return jsonify({"message": "Error: email y contraseña requeridos"}), 400
+    user = User.query.filter_by(email=email, password=password).first()
+    if user is None:
+        return("El usuario no es correcto"), 400
+    token = create_access_token(identity=user.id)
+    print(token)
+    return jsonify({"token": token}), 200
+
+     
+
+@app.route('/user/<email>', methods=['GET'])
+def get_user(email):
+    pass
 
 @app.route('/signup', methods=['POST'])
 def create_user():
