@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv
 import secrets
 from enum import Enum
 import os
@@ -12,13 +13,14 @@ from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 
 from flask_jwt_extended import JWTManager
+from routes.auth import routes_auth
 
 
 secret_key = secrets.token_hex(32)
 
 
 
-
+app.register_blueprint(routes_auth, url_prefix='/api')
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'instance', 'db.sqlite3')
@@ -126,25 +128,38 @@ def get_users():
     
 #     return jsonify({'msg' : 'Login successful'}), 200
 
-@app.route('/login', methods=['POST'])
-def login():
-    data = request.json
-    email = data.get("email")
-    password = data.get("password")
-    if not email or not password:
-        return jsonify({"message": "Error: email y contraseña requeridos"}), 400
-    user = User.query.filter_by(email=email, password=password).first()
-    if user is None:
-        return("El usuario no es correcto"), 400
-    token = create_access_token(identity=user.id)
-    print(token)
-    return jsonify({"token": token}), 200
+# @app.route('/login', methods=['POST'])
+# def login():
+#     data = request.json
+#     email = data.get("email")
+#     password = data.get("password")
+#     if not email or not password:
+#         return jsonify({"message": "Error: email y contraseña requeridos"}), 400
+#     user = User.query.filter_by(email=email, password=password).first()
+#     if user is None:
+#         return("El usuario no es correcto"), 400
+#     token = create_access_token(identity=user.id)
+#     print(token)
+#     return jsonify({"token": token}), 200
 
      
 
 @app.route('/user/<email>', methods=['GET'])
 def get_user(email):
-    pass
+    user = User.query.filter_by(email=email).first()
+    if user is None:
+        return jsonify({"error": "User not found"}), 404
+    
+    user_data = {
+        "id": user.id,
+        "full_name": user.full_name,
+        "email": user.email,
+        "avatar": user.avatar,
+        "role": user.role.value,
+        "pets": [pet.name for pet in user.pets]
+    }
+    
+    return jsonify(user_data), 200
 
 @app.route('/signup', methods=['POST'])
 def create_user():
@@ -168,4 +183,5 @@ def create_user():
 
 
 if __name__ == '__main__':
-    app.run()
+    load_dotenv()
+    app.run(debug=True, port='4000', host="0.0.0.0")
