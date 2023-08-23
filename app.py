@@ -142,6 +142,8 @@ def get_users():
 #     print(token)
 #     return jsonify({"token": token}), 200
 
+
+
      
 
 @app.route('/user/<email>', methods=['GET'])
@@ -175,7 +177,7 @@ def create_user():
     db.session.add(signup)
     db.session.commit()
 
-    print(signup)
+    
 
     return jsonify({"msg" : "Signed up successfully!"}), 201
 
