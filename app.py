@@ -13,14 +13,12 @@ from flask_jwt_extended import get_jwt_identity
 from flask_jwt_extended import jwt_required
 
 from flask_jwt_extended import JWTManager
-from routes.auth import routes_auth
 
 
 secret_key = secrets.token_hex(32)
 
 
 
-app.register_blueprint(routes_auth, url_prefix='/api')
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'instance', 'db.sqlite3')
@@ -158,7 +156,7 @@ def get_user(email):
         "email": user.email,
         "avatar": user.avatar,
         "role": user.role.value,
-        "pets": [pet.name for pet in user.pets]
+        # "pets": [pet.name for pet in user.pets]
     }
     
     return jsonify(user_data), 200
@@ -183,7 +181,39 @@ def create_user():
 
     
 
+@app.route('/pet_list', methods=['POST'])
+def pet_list():
+    pets = Pet.query.all()
+    pets_list = []
+    for pet in pets:
+        pets_list.append({
+            'id':pet.id,
+            'name':pet.name,
+            'type':pet.type,
+            'sex':pet.sex,
+            'age':pet.age,
+            'observations':,pet.observations,
+            'user_id':pet.user_id
+
+        })
+
+    user_list = []
+    for user in users:
+        user_list.append({
+            'id': user.id,
+            'full_name': user.full_name,
+            'email': user.email,
+            'avatar': user.avatar,
+            'role': user.role.value
+            })
+
+
 
 if __name__ == '__main__':
     load_dotenv()
     app.run(debug=True, port='4000', host="0.0.0.0")
+
+
+
+#Abrir sv con ./env/Scripts/activate (activar entorno virtual)
+# pip app.py // flask run
