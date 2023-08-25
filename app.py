@@ -192,7 +192,7 @@ def pet_list():
             'type':pet.type,
             'sex':pet.sex,
             'age':pet.age,
-            'observations':,pet.observations,
+            'observations':pet.observations,
             'user_id':pet.user_id
 
         })
